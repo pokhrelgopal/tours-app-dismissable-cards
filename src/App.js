@@ -1,24 +1,56 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import Loading from './Loading'
+import Tours from './Tours'
 
+const url = 'https://course-api.com/react-tours-project'
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+  const [loading, setLoading] = useState('');
+  const [tours, setTours] = useState([])
+
+  // RemoveTour Functionality
+  const removeTour = (id) => {
+    const newTours = tours.filter((tour) => tour.id !== id);
+    setTours(newTours);
+  }
+
+  const fetchTours = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(url);
+      const tours = await response.json();
+      setLoading(false);
+      setTours(tours)
+    } catch (error) {
+      setLoading(false)
+      console.log("You got an error !");
+    }
+  };
+  useEffect(() => {
+    fetchTours();
+  }, []);
+
+  if (tours.length === 0) {
+    return (
+      <div className="flex items-center justify-center flex-col w-full py-20">
+        <p className="text-2xl">No tours to show</p>
+        <button
+          className="text-lg bg-violet-800 text-white rounded px-2 py-1 hover:bg-violet-600 my-4"
+          onClick={() => fetchTours()}
         >
-          Learn React
-        </a>
-      </header>
-    </div>
+          Refresh <i class="text-md fa-solid fa-rotate-right"></i>
+        </button>
+
+      </div>
+    )
+  }
+
+  if (loading) return <main><Loading /></main>
+  return (
+    <>
+      <div div className="App container mx-auto" >
+        <Tours tours={tours} removeTour={removeTour} />
+      </div>
+    </>
   );
 }
 
